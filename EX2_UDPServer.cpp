@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 		recvBuff[bytesRecv] = '\0';
 		memcpy(command, recvBuff, strlen(recvBuff));
 
-		if (recvBuff == "GETAll") {
+		if (strcmp(recvBuff, "GETAll") == 0) {
 
 			DIR* dir;
 			struct dirent* ent;
