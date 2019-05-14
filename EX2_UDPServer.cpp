@@ -111,10 +111,11 @@ int main(int argc, char* argv[])
 	// The two last arguments are optional and will hold the details of the client for further communication. 
 	// NOTE: the last argument should always be the actual size of the client's data-structure (i.e. sizeof(sockaddr)).
 	cout << "Time Server: Wait for clients' requests. at PORT: " << TIME_PORT << " \n";
+	bytesRecv = recvfrom(m_socket, recvBuff, 255, 0, &client_addr, &client_addr_len);
 
 	while (true)
 	{
-		bytesRecv = recvfrom(m_socket, recvBuff, 255, 0, &client_addr, &client_addr_len);
+		
 		if (SOCKET_ERROR == bytesRecv)
 		{
 			cout << "Time Server: Error at recvfrom(): " << WSAGetLastError() << endl;
@@ -146,6 +147,8 @@ int main(int argc, char* argv[])
 				return EXIT_FAILURE;
 			}			
 		}
+
+		cout << "Time Server: Wait for NEW clients' requests.\n";
 
 
 
