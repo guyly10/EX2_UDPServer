@@ -111,11 +111,10 @@ int main(int argc, char* argv[])
 	// The two last arguments are optional and will hold the details of the client for further communication. 
 	// NOTE: the last argument should always be the actual size of the client's data-structure (i.e. sizeof(sockaddr)).
 	cout << "Time Server: Wait for clients' requests. at PORT: " << TIME_PORT << " \n";
-	bytesRecv = recvfrom(m_socket, recvBuff, 255, 0, &client_addr, &client_addr_len);
 
 	while (true)
 	{
-		
+		bytesRecv = recvfrom(m_socket, recvBuff, 255, 0, &client_addr, &client_addr_len);
 		if (SOCKET_ERROR == bytesRecv)
 		{
 			cout << "Time Server: Error at recvfrom(): " << WSAGetLastError() << endl;
@@ -127,7 +126,7 @@ int main(int argc, char* argv[])
 		recvBuff[bytesRecv] = '\0';
 		memcpy(command, recvBuff, strlen(recvBuff));
 
-		if (strcmp(recvBuff, "GETAll") == 0 && flag) {
+		if (strcmp(recvBuff, "GETAll") == 0) {
 			DIR* dir;
 			struct dirent* ent;
 			if ((dir = opendir("./Files")) != NULL) {
@@ -138,8 +137,7 @@ int main(int argc, char* argv[])
 					/*cout << "Time Server: Sent: " << bytesSent << "\\" << strlen(sendBuff) << " bytes of \"" << sendBuff << "\" message.\n";
 					cout << "Time Server: Wait for NEW clients' requests.\n";*/
 				}
-				closedir(dir);
-				flag = false;
+				closedir(dir);				
 			}
 			else {
 				/* could not open directory */
