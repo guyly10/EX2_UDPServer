@@ -18,6 +18,7 @@ int main(int argc, char* argv[])
 
 	int TIME_PORT = atoi(argv[1]);
 	int msg_counter = 1;
+	bool flag = true;
 	// Initialize Winsock (Windows Sockets).
 
 	// Create a WSADATA object called wsaData.
@@ -125,20 +126,19 @@ int main(int argc, char* argv[])
 		recvBuff[bytesRecv] = '\0';
 		memcpy(command, recvBuff, strlen(recvBuff));
 
-		if (strcmp(recvBuff, "GETAll") == 0) {
-
+		if (strcmp(recvBuff, "GETAll") == 0 && flag) {
 			DIR* dir;
 			struct dirent* ent;
 			if ((dir = opendir("./Files")) != NULL) {
 				/* print all the files and directories within directory */
-				while ((ent = readdir(dir)) != NULL) {
-					printf("%s\n", ent->d_name);
+				while ((ent = readdir(dir)) != NULL) {					
 					strcpy_s(sendBuff, ent->d_name);
 					sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
-					cout << "Time Server: Sent: " << bytesSent << "\\" << strlen(sendBuff) << " bytes of \"" << sendBuff << "\" message.\n";
-					cout << "Time Server: Wait for NEW clients' requests.\n";
+					/*cout << "Time Server: Sent: " << bytesSent << "\\" << strlen(sendBuff) << " bytes of \"" << sendBuff << "\" message.\n";
+					cout << "Time Server: Wait for NEW clients' requests.\n";*/
 				}
 				closedir(dir);
+				flag = false;
 			}
 			else {
 				/* could not open directory */
