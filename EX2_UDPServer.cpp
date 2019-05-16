@@ -19,6 +19,8 @@ int main(int argc, char* argv[])
 	int TIME_PORT = atoi(argv[1]);
 	int msg_counter = 1;
 	bool flag = true;
+	int count = 0;
+	int getCount = 0;
 	// Initialize Winsock (Windows Sockets).
 
 	// Create a WSADATA object called wsaData.
@@ -102,6 +104,8 @@ int main(int argc, char* argv[])
 	char sendBuff[255] = "";
 	char recvBuff[255];
 	char command[255];
+	char fileName[255];
+	char get[] = "GET ";
 
 	// Get client's requests and answer them.
 	// The recvfrom function receives a datagram and stores the source address.
@@ -131,13 +135,19 @@ int main(int argc, char* argv[])
 			struct dirent* ent;
 			if ((dir = opendir("./Files")) != NULL) {
 				/* print all the files and directories within directory */
+				while ((ent = readdir(dir)) != NULL) {
+					count++;
+					sendBuff[0] = (char)count;
+				}
+				sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
+				closedir(dir);
+
+				dir = opendir("./Files");
 				while ((ent = readdir(dir)) != NULL) {					
 					strcpy_s(sendBuff, ent->d_name);
 					sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
-					/*cout << "Time Server: Sent: " << bytesSent << "\\" << strlen(sendBuff) << " bytes of \"" << sendBuff << "\" message.\n";
-					cout << "Time Server: Wait for NEW clients' requests.\n";*/
 				}
-				closedir(dir);				
+				closedir(dir);
 			}
 			else {
 				/* could not open directory */
@@ -146,42 +156,44 @@ int main(int argc, char* argv[])
 			}			
 		}
 
+		else
+		{
+			for (int i = 0; i < 4; i++) 
+			{
+				if (recvBuff[i] == get[i])
+				{
+					getCount++;
+				}
+			}
+
+			//Checking if the command is get
+			if (getCount == 3)
+			{
+				memcpy(fileName, recvBuff + 4, strlen(recvBuff) - 4);
+				getCount = 0;
+				DIR* dir;
+				struct dirent* ent;
+				if ((dir = opendir("./Files")) != NULL) {
+					/* print all the files and directories within directory */
+					while ((ent = readdir(dir)) != NULL) {
+						if (strcmp(ent->d_name, fileName) == 0)
+						{
+
+						}
+					}
+					
+					closedir(dir);
+				}
+				else {
+					/* could not open directory */
+					perror("");
+					return EXIT_FAILURE;
+				}
+			}
+			getCount = 0;
+		}
+
 		cout << "Time Server: Wait for NEW clients' requests.\n";
-
-
-
-		//recvBuff[bytesRecv] = '\0'; //add the null-terminating to make it a string
-		//cout << "Time Server: Recieved: " << bytesRecv << " bytes of \"" << recvBuff << "\" message.\n";
-
-		//// Answer client's request by the current time.
-
-		//// Get the current time.
-		//time_t timer;
-		//time(&timer);
-		//// Parse the current time to printable string.
-		////strcpy(sendBuff, ctime(&timer));
-		//char integer_string[32];
-		//sprintf_s(integer_string, "%dd", msg_counter);
-		//msg_counter++;
-		//char s2[100] = "Server message Number: ";
-		//strcat_s(s2, integer_string);
-
-		//strcpy_s(sendBuff, _countof(sendBuff), s2);
-
-		//sendBuff[strlen(sendBuff) - 1] = '\0'; //to remove the new-line from the created string
-		//// Sends the answer to the client, using the client address gathered
-		//// by recvfrom. 
-		//bytesSent = sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
-		//if (SOCKET_ERROR == bytesSent)
-		//{
-		//	cout << "Time Server: Error at sendto(): " << WSAGetLastError() << endl;
-		//	closesocket(m_socket);
-		//	WSACleanup();
-		//	return(-1);
-		//}
-
-		//cout << "Time Server: Sent: " << bytesSent << "\\" << strlen(sendBuff) << " bytes of \"" << sendBuff << "\" message.\n";
-		//cout << "Time Server: Wait for NEW clients' requests.\n";
 	}
 
 	// Closing connections and Winsock.
