@@ -5,6 +5,8 @@ using namespace std;
 #include <string.h>
 #include <time.h>
 #include <ctime>
+#include <assert.h>
+#pragma warning(disable : 4996)
 
 
 
@@ -108,6 +110,8 @@ int main(int argc, char* argv[])
 	char command[255];
 	char fileName[255];
 	char get[] = "GET ";
+	char files[100] = "./Files/";
+	int fileCount = 0;
 
 	// Get client's requests and answer them.
 	// The recvfrom function receives a datagram and stores the source address.
@@ -128,25 +132,26 @@ int main(int argc, char* argv[])
 			closesocket(m_socket);
 			WSACleanup();
 			return(-1);
-		}		
+		}
 
 		recvBuff[bytesRecv] = '\0';
 		secondWord[bytesRecv2] = '\0';
 
-		if (strcmp(recvBuff, "GET") == 0 && strcmp(secondWord, "All") == 0) {
+		if (strcmp(recvBuff, "GET") == 0 && strcmp(secondWord, "All") == 0)
+		{
 			DIR* dir;
 			struct dirent* ent;
 			if ((dir = opendir("./Files")) != NULL) {
 				/* print all the files and directories within directory */
 				while ((ent = readdir(dir)) != NULL) {
-					count++;
-					sendBuff[0] = (char)count;
+					count++;					
 				}
+				sendBuff[0] = (char)count;
 				sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
 				closedir(dir);
 
 				dir = opendir("./Files");
-				while ((ent = readdir(dir)) != NULL) {					
+				while ((ent = readdir(dir)) != NULL) {
 					strcpy_s(sendBuff, ent->d_name);
 					sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
 				}
@@ -156,44 +161,49 @@ int main(int argc, char* argv[])
 				/* could not open directory */
 				perror("");
 				return EXIT_FAILURE;
-			}			
+			}
 		}
 
-		else
+		else if (strcmp(recvBuff, "GET") == 0)
 		{
-			for (int i = 0; i < 4; i++) 
-			{
-				if (recvBuff[i] == get[i])
-				{
-					getCount++;
-				}
-			}
-
-			//Checking if the command is get
-			if (getCount == 3)
-			{
-				memcpy(fileName, recvBuff + 4, strlen(recvBuff) - 4);
-				getCount = 0;
-				DIR* dir;
-				struct dirent* ent;
-				if ((dir = opendir("./Files")) != NULL) {
-					/* print all the files and directories within directory */
-					while ((ent = readdir(dir)) != NULL) {
-						if (strcmp(ent->d_name, fileName) == 0)
-						{
-
-						}
+			
+			DIR* dir;
+			struct dirent* ent;
+			if ((dir = opendir("./Files")) != NULL) {
+				/* print all the files and directories within directory */
+				while ((ent = readdir(dir)) != NULL) {
+					if (strcmp(ent->d_name, secondWord) == 0)
+					{
+						fileCount++;
+						strcat(files, secondWord);
+						FILE *f = fopen(files, "r");
+						assert(f);
+						fseek(f, 0, SEEK_END);
+						long length = ftell(f);
+						fseek(f, 0, SEEK_SET);
+						char *buffer = (char *)malloc(length + 1);
+						buffer[length] = '\0';
+						fread(buffer, 1, length, f);
+						sendto(m_socket, buffer, (int)strlen(buffer), 0, (const sockaddr*)& client_addr, client_addr_len);
+						fclose(f);						
 					}
-					
-					closedir(dir);
+					if (fileCount == 0) {
+						char fileNotFound[] = "404:File not Found";
+						sendto(m_socket, fileNotFound, (int)strlen(fileNotFound), 0, (const sockaddr*)& client_addr, client_addr_len);
+					}
+
+					fileCount = 0;
 				}
-				else {
-					/* could not open directory */
-					perror("");
-					return EXIT_FAILURE;
-				}
+
+				closedir(dir);
 			}
-			getCount = 0;
+			else {
+				/* could not open directory */
+				perror("");
+				return EXIT_FAILURE;
+			}
+
+
 		}
 
 		cout << "Time Server: Wait for NEW clients' requests.\n";

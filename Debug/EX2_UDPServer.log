@@ -1,2 +1,5 @@
-﻿  EX2_UDPServer.vcxproj -> C:\Users\Guy\Documents\Visual Studio 2015\Projects\EX2_UDPServer\Debug\EX2_UDPServer.exe
+﻿  EX2_UDPServer.cpp
+c:\users\guy\documents\visual studio 2015\projects\ex2_udpserver\ex2_udpserver\ex2_udpserver.cpp(110): warning C4101: 'command': unreferenced local variable
+c:\users\guy\documents\visual studio 2015\projects\ex2_udpserver\ex2_udpserver\ex2_udpserver.cpp(111): warning C4101: 'fileName': unreferenced local variable
+  EX2_UDPServer.vcxproj -> C:\Users\Guy\Documents\Visual Studio 2015\Projects\EX2_UDPServer\Debug\EX2_UDPServer.exe
   EX2_UDPServer.vcxproj -> C:\Users\Guy\Documents\Visual Studio 2015\Projects\EX2_UDPServer\Debug\EX2_UDPServer.pdb (Full PDB)
