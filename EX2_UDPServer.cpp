@@ -101,8 +101,10 @@ int main(int argc, char* argv[])
 	int client_addr_len = sizeof(client_addr);
 	int bytesSent = 0;
 	int bytesRecv = 0;
+	int bytesRecv2 = 0;
 	char sendBuff[255] = "";
 	char recvBuff[255];
+	char secondWord[255];
 	char command[255];
 	char fileName[255];
 	char get[] = "GET ";
@@ -119,18 +121,19 @@ int main(int argc, char* argv[])
 	while (true)
 	{
 		bytesRecv = recvfrom(m_socket, recvBuff, 255, 0, &client_addr, &client_addr_len);
+		bytesRecv2 = recvfrom(m_socket, secondWord, 255, 0, &client_addr, &client_addr_len);
 		if (SOCKET_ERROR == bytesRecv)
 		{
 			cout << "Time Server: Error at recvfrom(): " << WSAGetLastError() << endl;
 			closesocket(m_socket);
 			WSACleanup();
 			return(-1);
-		}
+		}		
 
 		recvBuff[bytesRecv] = '\0';
-		memcpy(command, recvBuff, strlen(recvBuff));
+		secondWord[bytesRecv2] = '\0';
 
-		if (strcmp(recvBuff, "GETAll") == 0) {
+		if (strcmp(recvBuff, "GET") == 0 && strcmp(secondWord, "All") == 0) {
 			DIR* dir;
 			struct dirent* ent;
 			if ((dir = opendir("./Files")) != NULL) {
