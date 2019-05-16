@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 	// The WSACleanup function destructs the use of WS2_32.DLL by a process.
 	if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
 	{
-		cout << "Time Server: Error at WSAStartup()\n";
+		cout << "Server: Error at WSAStartup()\n";
 	}
 
 	// Server side:
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 	// error number associated with the last error that occurred.
 	if (INVALID_SOCKET == m_socket)
 	{
-		cout << "Time Server: Error at socket(): " << WSAGetLastError() << endl;
+		cout << "Server: Error at socket(): " << WSAGetLastError() << endl;
 		WSACleanup();
 		return(-1);
 	}
@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 	// sockaddr structure (in bytes).
 	if (SOCKET_ERROR == bind(m_socket, (SOCKADDR*)& serverService, sizeof(serverService)))
 	{
-		cout << "Time Server: Error at bind(): " << WSAGetLastError() << endl;
+		cout << "Server: Error at bind(): " << WSAGetLastError() << endl;
 		closesocket(m_socket);
 		WSACleanup();
 		return(-1);
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 	// specifying the way in which the call is made (0 for default).
 	// The two last arguments are optional and will hold the details of the client for further communication. 
 	// NOTE: the last argument should always be the actual size of the client's data-structure (i.e. sizeof(sockaddr)).
-	cout << "Time Server: Wait for clients' requests. at PORT: " << TIME_PORT << " \n";
+	cout << "Server: Wait for clients' requests. at PORT: " << TIME_PORT << " \n";
 
 	while (true)
 	{
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 		bytesRecv2 = recvfrom(m_socket, secondWord, 255, 0, &client_addr, &client_addr_len);
 		if (SOCKET_ERROR == bytesRecv)
 		{
-			cout << "Time Server: Error at recvfrom(): " << WSAGetLastError() << endl;
+			cout << "Server: Error at recvfrom(): " << WSAGetLastError() << endl;
 			closesocket(m_socket);
 			WSACleanup();
 			return(-1);
@@ -185,15 +185,18 @@ int main(int argc, char* argv[])
 						buffer[length] = '\0';
 						fread(buffer, 1, length, f);
 						sendto(m_socket, buffer, (int)strlen(buffer), 0, (const sockaddr*)& client_addr, client_addr_len);
+						memset(files, 0, sizeof(files));
+						strcpy(files, "./Files/");
 						fclose(f);						
-					}
-					if (fileCount == 0) {
-						char fileNotFound[] = "404:File not Found";
-						sendto(m_socket, fileNotFound, (int)strlen(fileNotFound), 0, (const sockaddr*)& client_addr, client_addr_len);
-					}
-
-					fileCount = 0;
+					}					
 				}
+
+				if (fileCount == 0) {
+					char fileNotFound[] = "404:File not Found";
+					sendto(m_socket, fileNotFound, (int)strlen(fileNotFound), 0, (const sockaddr*)& client_addr, client_addr_len);
+				}
+
+				fileCount = 0;
 
 				closedir(dir);
 			}
@@ -206,11 +209,11 @@ int main(int argc, char* argv[])
 
 		}
 
-		cout << "Time Server: Wait for NEW clients' requests.\n";
+		cout << "Server: Wait for NEW clients' requests.\n";
 	}
 
 	// Closing connections and Winsock.
-	cout << "Time Server: Closing Connection.\n";
+	cout << "Server: Closing Connection.\n";
 	closesocket(m_socket);
 	WSACleanup();
 }
