@@ -126,9 +126,11 @@ int main(int argc, char* argv[])
 	{
 		bytesRecv = recvfrom(m_socket, recvBuff, 255, 0, &client_addr, &client_addr_len);
 		bytesRecv2 = recvfrom(m_socket, secondWord, 255, 0, &client_addr, &client_addr_len);
-		if (SOCKET_ERROR == bytesRecv)
+		if (SOCKET_ERROR == bytesRecv || bytesRecv2 == SOCKET_ERROR)
 		{
 			cout << "Server: Error at recvfrom(): " << WSAGetLastError() << endl;
+			strcpy_s(sendBuff, "500: Unknown Error");
+			sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
 			closesocket(m_socket);
 			WSACleanup();
 			return(-1);
@@ -148,6 +150,7 @@ int main(int argc, char* argv[])
 				}
 				sendBuff[0] = (char)count;
 				sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
+				count = 0;
 				closedir(dir);
 
 				dir = opendir("./Files");
@@ -207,6 +210,18 @@ int main(int argc, char* argv[])
 			}
 
 
+		}
+
+		else if (strcmp(recvBuff, "PUT") == 0)
+		{
+			strcpy_s(sendBuff, "Not Implemented yet");
+			sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
+		}
+		
+		else
+		{
+			strcpy_s(sendBuff, "500: Unknown Error");
+			sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
 		}
 
 		cout << "Server: Wait for NEW clients' requests.\n";
