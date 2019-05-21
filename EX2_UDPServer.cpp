@@ -18,12 +18,8 @@ int main(int argc, char* argv[])
 
 	}
 
-	int TIME_PORT = atoi(argv[1]);
-	int msg_counter = 1;
-	bool flag = true;
-	int count = 0;
-	int getCount = 0;
-	// Initialize Winsock (Windows Sockets).
+	int TIME_PORT = atoi(argv[1]);		
+	int count = 0;	
 
 	// Create a WSADATA object called wsaData.
 	// The WSADATA structure contains information about the Windows 
@@ -100,26 +96,19 @@ int main(int argc, char* argv[])
 
 	// Send and receive data.
 	sockaddr client_addr;
-	int client_addr_len = sizeof(client_addr);
-	int bytesSent = 0;
+	int client_addr_len = sizeof(client_addr);	
 	int bytesRecv = 0;
 	int bytesRecv2 = 0;
 	char sendBuff[255] = "";
+	//holds the first word from the client
 	char recvBuff[255];
-	char secondWord[255];
-	char command[255];
-	char fileName[255];
-	char get[] = "GET ";
+	//holds the second word from the client
+	char secondWord[255];	
 	char files[100] = "./Files/";
+	//count the number of files in the folder
 	int fileCount = 0;
 
-	// Get client's requests and answer them.
-	// The recvfrom function receives a datagram and stores the source address.
-	// The buffer for data to be received and its available size are 
-	// returned by recvfrom. The fourth argument is an idicator 
-	// specifying the way in which the call is made (0 for default).
-	// The two last arguments are optional and will hold the details of the client for further communication. 
-	// NOTE: the last argument should always be the actual size of the client's data-structure (i.e. sizeof(sockaddr)).
+	
 	cout << "Server: Wait for clients' requests. at PORT: " << TIME_PORT << " \n";
 
 	while (true)
