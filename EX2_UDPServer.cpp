@@ -115,10 +115,18 @@ int main(int argc, char* argv[])
 	{
 		bytesRecv = recvfrom(m_socket, recvBuff, 255, 0, &client_addr, &client_addr_len);
 		bytesRecv2 = recvfrom(m_socket, secondWord, 255, 0, &client_addr, &client_addr_len);
-		if (SOCKET_ERROR == bytesRecv || bytesRecv2 == SOCKET_ERROR)
+		if (SOCKET_ERROR == bytesRecv)
 		{
-			cout << "Server: Error at recvfrom(): " << WSAGetLastError() << endl;
-			strcpy_s(sendBuff, "500: Unknown Error");
+			cout << "Server: Error at recvfrom(): " << WSAGetLastError() << endl;			
+			sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
+			closesocket(m_socket);
+			WSACleanup();
+			return(-1);
+		}
+
+		if (SOCKET_ERROR == bytesRecv2) 
+		{			
+			strcpy_s(sendBuff, "Closing Server Connection");
 			sendto(m_socket, sendBuff, (int)strlen(sendBuff), 0, (const sockaddr*)& client_addr, client_addr_len);
 			closesocket(m_socket);
 			WSACleanup();
